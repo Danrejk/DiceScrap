@@ -26,6 +26,9 @@
 		<Reference Include="UnityEngine">
 			<HintPath>lib\UnityEngine.dll</HintPath>
 		</Reference>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>lib\Assembly-CSharp.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
