@@ -6,6 +6,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using LethalLib.Modules;
 using UnityEngine;
+using UnityEngine.Assertions;
 using NetworkPrefabs = LethalLib.Modules.NetworkPrefabs;
 
 namespace DiceScrap
@@ -21,23 +22,37 @@ namespace DiceScrap
         {
             InitPiosikDie();
             // Plugin startup logic
-            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!!!!!!!!!!!!!!!!");
         }
 
         private void InitPiosikDie()
         {
-            var assetDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "landmine_placer");
+            var assetDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "piosikdiedata");
             var assetBundle = AssetBundle.LoadFromFile(assetDir);
 
-            MyCustomAssets = AssetBundle.LoadFromFile(Path.Combine(assetDir, "piosikdiedata"));
-            if (MyCustomAssets == null)
+            piosikDie = assetBundle.LoadAsset<Item>("Assets/piosikdiedata.asset");
+            if (piosikDie == null)
             {
-                Logger.LogError("Failed to load custom assets."); // ManualLogSource for your plugin
+                Logger.LogError("Could not load piosikdiedata item");
                 return;
             }
 
-            var rarity = 500; //30
-            piosikDie = assetBundle.LoadAsset<Item>("Assets/piosikdiedata.asset");
+            var piosikDiePrefab = piosikDie.spawnPrefab;
+            if (piosikDiePrefab == null)
+            {
+                Logger.LogError("Could not load piosikdiedata prefab");
+                return;
+            }
+
+            var physicsProp = piosikDiePrefab.GetComponent<PhysicsProp>();
+            if (physicsProp == null)
+            {
+                Logger.LogError("PhysicsProp is missing on the piosikdiedata prefab.");
+                return;
+            }
+
+
+            var rarity = 5000; //30
             LethalLib.Modules.Utilities.FixMixerGroups(piosikDie.spawnPrefab);
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(piosikDie.spawnPrefab);
             LethalLib.Modules.Items.RegisterScrap(piosikDie, rarity, LethalLib.Modules.Levels.LevelTypes.All);
